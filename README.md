@@ -4,9 +4,10 @@ An ASP.NET Core web application for browsing and managing a game catalog, deploy
 
 ## Tech Stack
 
-- **Framework:** ASP.NET Core (targeting .NET 8.0)
+- **Framework:** ASP.NET Core (.NET 8.0)
 - **Pattern:** MVC (Model-View-Controller)
-- **Hosting:** Azure App Service (`GameStore20250410103506`)
+- **Hosting:** Azure App Service (`GameStore20250410103506`, Sweden Central)
+- **Auth for deployment:** Azure Managed Identity (OIDC) via GitHub Actions
 
 ## Project Structure
 
@@ -31,7 +32,7 @@ GameStore/
 ### Run locally
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/SravaniO/GameAppStore.git
 cd GameStore
 dotnet run
 ```
@@ -49,18 +50,37 @@ dotnet publish -c Release -o ./publish
 The project uses **GitHub Actions** for automated CI/CD. On every push to `main`:
 
 1. The app is built with `dotnet build` on Windows.
-2. Published artifacts are uploaded.
-3. The artifact is deployed to the Azure Web App using a publish profile stored as a GitHub secret (`AZUREAPPSERVICE_PUBLISHPROFILE_...`).
+2. Artifacts are published and uploaded.
+3. The workflow authenticates to Azure using **OIDC (OpenID Connect)** via a User-assigned Managed Identity.
+4. The artifact is deployed to the Azure Web App.
 
-The workflow file is located at `.github/workflows/`.
+The workflow file is located at `.github/workflows/main_gamestore20250410103506.yml`.
 
-## Environment & Secrets
+## Azure Setup
+
+| Resource | Name |
+|---|---|
+| App Service | `GameStore20250410103506` |
+| Resource Group | `GameStore20250410103506_group` |
+| Region | Sweden Central |
+| Managed Identity | `oidc-msi-8619` |
+
+The Managed Identity has a **federated credential** configured for:
+- **Entity type:** Environment
+- **Environment name:** `Production`
+- **Repository:** `SravaniO/GameAppStore`
+
+## GitHub Secrets
+
+These secrets must be set under **Settings → Secrets and variables → Actions**:
 
 | Secret | Description |
 |---|---|
-| `AZUREAPPSERVICE_PUBLISHPROFILE_D49E2C2321E942DD91426BFAAEDA612A` | Azure publish profile for the Production slot |
+| `AZUREAPPSERVICE_CLIENTID` | Client ID of the `oidc-msi-8619` Managed Identity |
+| `AZUREAPPSERVICE_TENANTID` | Tenant ID from Microsoft Entra ID |
+| `AZUREAPPSERVICE_SUBSCRIPTIONID` | Azure Subscription ID |
 
-Store secrets in **GitHub → Settings → Secrets and variables → Actions**. Never commit them to the repository.
+Never commit secret values to the repository.
 
 ## Contributing
 
