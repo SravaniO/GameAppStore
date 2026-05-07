@@ -21,7 +21,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '3.1'
+          dotnet-version: '8.0'
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
@@ -55,4 +55,4 @@ jobs:
           app-name: 'GameStore20250410103506'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D49E2C2321E942DD91426BFAAEDA612A }}
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
